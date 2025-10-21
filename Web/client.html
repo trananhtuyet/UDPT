@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracker Client</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4f46e5', 'success': '#10b981', 'danger': '#ef4444', 'neutral': '#1f2937',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6; }
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; width: 1em; height: 1em; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
+        <h2 class="text-2xl font-bold text-center text-gray-900">Time Tracker Client</h2>
+        <p class="text-center text-gray-500">Tương tác với hệ thống phân tán qua ID</p>
+
+        <div id="messageBox" class="p-4 rounded-lg hidden">
+            <p id="messageText" class="font-medium"></p>
+        </div>
+
+        <div>
+            <label for="userId" class="block text-sm font-medium text-gray-700">ID Thành viên (Ví dụ: TuanAnh)</label>
+            <input type="text" id="userId" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" placeholder="Nhập ID...">
+        </div>
+        
+        <div class="flex space-x-4">
+            <button id="checkInBtn" class="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-success hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-success transition duration-150">
+                <span id="checkInText">Check-in</span>
+            </button>
+            <button id="checkOutBtn" class="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-danger hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger transition duration-150">
+                <span id="checkOutText">Check-out</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:4567/api'; 
+        const userIdInput = document.getElementById('userId');
+        const checkInBtn = document.getElementById('checkInBtn');
+        const checkOutBtn = document.getElementById('checkOutBtn');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+
+        function showStatus(message, type = 'success') {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+            messageBox.className = 'p-4 rounded-lg';
+            
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                 messageBox.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                 messageBox.classList.add('bg-indigo-100', 'text-indigo-700');
+            }
+        }
+        
+        function setButtonLoading(button, isLoading) {
+            const textSpan = button.querySelector('span');
+            button.disabled = isLoading;
+            if (isLoading) {
+                textSpan.innerHTML = '<div class="spinner"></div>';
+            } else {
+                textSpan.textContent = button.id === 'checkInBtn' ? 'Check-in' : 'Check-out';
+            }
+        }
+
+        async function performAction(action, userId, button) {
+            setButtonLoading(button, true);
+            try {
+                const url = `${API_BASE_URL}/${action}/${userId}`;
+                const response = await fetch(url, { method: 'POST' });
+
+                // If server returns non-JSON (e.g. HTML error page), handle gracefully
+                const contentType = response.headers.get('content-type') || '';
+                let data = null;
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    data = { message: text.slice(0, 300), raw: text };
+                }
+
+                if (response.ok) {
+                    // show success message and optional returned details
+                    const msg = data.message || 'Thành công';
+                    let details = msg;
+                    if (data.minutesWorked !== undefined) details += ` — ${data.minutesWorked.toFixed(2)} phút`;
+                    if (data.estimatedSalary !== undefined) details += ` — ${new Intl.NumberFormat('vi-VN', {style:'currency', currency:'VND', minimumFractionDigits:0}).format(data.estimatedSalary)}`;
+                    showStatus(details, 'success');
+                } else {
+                    const errMsg = data.message || response.statusText || 'Lỗi Server';
+                    showStatus(`Lỗi ${action}: ${errMsg}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Lỗi kết nối Server Java (Port 4567). Chi tiết: ${error.message}`, 'error');
+            } finally {
+                setButtonLoading(button, false);
+            }
+        }
+
+        checkInBtn.addEventListener('click', () => {
+            const userId = userIdInput.value.trim();
+            if (userId) performAction('checkin', userId, checkInBtn);
+            else showStatus("Vui lòng nhập ID thành viên.", 'error');
+        });
+
+        checkOutBtn.addEventListener('click', () => {
+            const userId = userIdInput.value.trim();
+            if (userId) performAction('checkout', userId, checkOutBtn);
+            else showStatus("Vui lòng nhập ID thành viên.", 'error');
+        });
+    </script>
+</body>
+</html>

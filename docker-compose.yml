@@ -1,0 +1,17 @@
+version: '3'
+services:
+  zookeeper:
+    image: zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  timetracker:
+    build: .
+    ports:
+      - "4567:4567"
+    depends_on:
+      - zookeeper
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
