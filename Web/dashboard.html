@@ -89,12 +89,12 @@
             lastUpdated.textContent = `Cập nhật lần cuối: ${new Date().toLocaleTimeString('vi-VN')} (Real-time)`;
         }
 
-        // ⭐ LOGIC WEBSOCKET CHÍNH ⭐
+
         function connectWebSocket() {
             const ws = new WebSocket(WS_ADDRESS);
 
             ws.onopen = () => {
-                showStatus("✅ Đã kết nối WebSocket thành công. Đang nhận dữ liệu tức thời.", 'info');
+                showStatus(" Đã kết nối WebSocket thành công. Đang nhận dữ liệu tức thời.", 'info');
                 lastUpdated.textContent = `Kết nối: Đã mở tại ${new Date().toLocaleTimeString('vi-VN')}`;
             };
 
@@ -108,19 +108,19 @@
             };
 
             ws.onclose = () => {
-                showStatus("⚠️ Mất kết nối WebSocket. Đang thử kết nối lại sau 3 giây...", 'error');
+                showStatus(" Mất kết nối WebSocket. Đang thử kết nối lại sau 3 giây...", 'error');
                 lastUpdated.textContent = `Kết nối: Đã đóng tại ${new Date().toLocaleTimeString('vi-VN')}`;
                 // Tự động kết nối lại
                 setTimeout(connectWebSocket, 3000); 
             };
 
             ws.onerror = (error) => {
-                showStatus("❌ Lỗi WebSocket: Không thể kết nối đến Server API.", 'error');
+                showStatus(" Lỗi WebSocket: Không thể kết nối đến Server API.", 'error');
                 ws.close();
             };
         }
 
-        connectWebSocket(); // Bắt đầu kết nối khi trang tải
+        connectWebSocket(); 
     </script>
 </body>
 </html>
