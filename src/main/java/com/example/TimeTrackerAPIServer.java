@@ -158,7 +158,7 @@ public class TimeTrackerAPIServer {
         // 1. Khởi tạo Database và Zookeeper
         initializeEmployeeDatabase();
         zkClient = new TimeTrackerClient("API_SERVER_WATCHER");
-        zkClient.connect(statusChangeWatcher); // ⭐ TRUYỀN WATCHER VÀO KẾT NỐI
+        zkClient.connect(statusChangeWatcher); // TRUYỀN WATCHER VÀO KẾT NỐI
 
         // 2. Cấu hình Spark Server
         // 2. Cấu hình Spark Server
@@ -287,7 +287,7 @@ public class TimeTrackerAPIServer {
             String value = request.body();
             try {
                 zkClient.setConfigData(key, value);
-                logger.info("✅ Cấu hình {} đã được cập nhật thành: {}", key, value);
+                logger.info(" Cấu hình {} đã được cập nhật thành: {}", key, value);
                 return gson.toJson(Map.of("status", "success", "message", "Cấu hình đã được cập nhật thành công."));
             } catch (Exception e) {
                 response.status(500);
@@ -326,7 +326,7 @@ public class TimeTrackerAPIServer {
         @OnWebSocketConnect
         public void onConnect(Session userSession) {
             activeSessions.add(userSession);
-            logger.info("➕ WebSocket mở: {} (Tổng: {})", userSession.getRemoteAddress(), activeSessions.size());
+            logger.info(" WebSocket mở: {} (Tổng: {})", userSession.getRemoteAddress(), activeSessions.size());
             try {
                 // Gửi trạng thái hiện tại ngay khi kết nối
                 userSession.getRemote().sendString(getDetailedStatusJson());
