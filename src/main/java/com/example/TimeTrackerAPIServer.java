@@ -32,10 +32,10 @@ public class TimeTrackerAPIServer {
     private static final double DEFAULT_HOURLY_RATE = 50000.0;
 
     private static TimeTrackerClient zkClient;
-    // ⭐ SET để lưu trữ các WebSocket Session đang hoạt động
+    // SET để lưu trữ các WebSocket Session đang hoạt động
     private static final Set<Session> activeSessions = Collections.synchronizedSet(new HashSet<>()); 
     
-    // ⭐ Cấu trúc Dữ liệu Nhân viên Giả lập
+    // Cấu trúc Dữ liệu Nhân viên Giả lập
     private static class EmployeeInfo {
         String id;
         String name;
@@ -48,7 +48,6 @@ public class TimeTrackerAPIServer {
         }
     }
     private static final Map<String, EmployeeInfo> employeeDatabase = new HashMap<>();
-    // ...existing code...
 
     // Khởi tạo Database
     private static void initializeEmployeeDatabase() {
@@ -58,16 +57,16 @@ public class TimeTrackerAPIServer {
         logger.info("Đã tải {} thông tin nhân viên.", employeeDatabase.size());
     }
     
-    // ⭐ WATCHER ĐỂ LẮNG NGHE SỰ KIỆN ZK
+    // WATCHER ĐỂ LẮNG NGHE SỰ KIỆN ZK
     private static final Watcher statusChangeWatcher = new Watcher() {
         @Override
         public void process(WatchedEvent event) {
             if (event.getType() == Event.EventType.NodeChildrenChanged) {
-                logger.info("🔥 ZNode thay đổi (Có người Check-in/out). Bắt đầu cập nhật Real-time...");
+                logger.info(" ZNode thay đổi (Có người Check-in/out). Bắt đầu cập nhật Real-time...");
                 try {
                     // Cố gắng kích hoạt lại Watcher
                     zkClient.getActiveMembers(this); 
-                    // ⭐ GỌI PHƯƠNG THỨC GỬI DỮ LIỆU QUA WEBSOCKET
+                    //  GỌI PHƯƠNG THỨC GỬI DỮ LIỆU QUA WEBSOCKET
                     sendRealTimeStatusUpdate(); 
                 } catch (Exception e) {
                     logger.error("Lỗi khi thiết lập lại Watcher: {}", e.getMessage());
@@ -79,7 +78,7 @@ public class TimeTrackerAPIServer {
         }
     };
 
-    // ⭐ PHƯƠNG THỨC TÍNH TOÁN VÀ TRẢ VỀ TRẠNG THÁI CHI TIẾT
+    // PHƯƠNG THỨC TÍNH TOÁN VÀ TRẢ VỀ TRẠNG THÁI CHI TIẾT
     private static String getDetailedStatusJson() throws Exception {
         // Sử dụng Watcher để thiết lập lắng nghe khi đọc ZNode con
         List<String> memberIds = zkClient.getActiveMembers(statusChangeWatcher); 
@@ -133,7 +132,7 @@ public class TimeTrackerAPIServer {
         return gson.toJson(detailedStatus);
     }
 
-    // ⭐ PHƯƠNG THỨC GỬI DỮ LIỆU ĐẾN TẤT CẢ CLIENT QUA WEBSOCKET
+    //  PHƯƠNG THỨC GỬI DỮ LIỆU ĐẾN TẤT CẢ CLIENT QUA WEBSOCKET
     private static void sendRealTimeStatusUpdate() throws Exception {
         String statusJson = getDetailedStatusJson();
         // Log the payload so we can verify salary values being sent to clients
@@ -166,7 +165,7 @@ public class TimeTrackerAPIServer {
         port(API_PORT);
         staticFiles.location("/public"); // Nếu bạn có các file tĩnh
         
-        // 3. ⭐ WEBSOCKET ENDPOINT (phải được cấu hình trước các route)
+        // 3. WEBSOCKET ENDPOINT (phải được cấu hình trước các route)
         webSocket("/ws/status", StatusWebSocketHandler.class);
 
         // Start periodic broadcaster to update clients regularly (every 30 seconds)
@@ -199,8 +198,7 @@ public class TimeTrackerAPIServer {
             return "OK";
         });
         
-        // 4. API Endpoints
-        
+
         // POST /api/checkin/:userId
         post("/api/checkin/:userId", "application/json", (request, response) -> {
             response.type("application/json");
@@ -283,7 +281,7 @@ public class TimeTrackerAPIServer {
             ));
         });
         
-        // ⭐ ENDPOINT CẤU HÌNH CONFIG (GET/POST /api/config/:key)
+        // ENDPOINT CẤU HÌNH CONFIG (GET/POST /api/config/:key)
         post("/api/config/:key", "application/json", (request, response) -> {
             String key = request.params(":key");
             String value = request.body();
@@ -322,7 +320,7 @@ public class TimeTrackerAPIServer {
         }));
     }
     
-    // ⭐ WEBSOCKET HANDLER ĐỂ QUẢN LÝ KẾT NỐI
+    // WEBSOCKET HANDLER ĐỂ QUẢN LÝ KẾT NỐI
     @WebSocket
     public static class StatusWebSocketHandler {
         @OnWebSocketConnect
