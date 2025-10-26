@@ -76,7 +76,7 @@ public class TimeTrackerClient implements Watcher {
         String data = "{\"startTime\":\"" + now.toString() + "\"}";
 
         zooKeeper.create(userPath, data.getBytes(StandardCharsets.UTF_8), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-        logger.info("✅ Client {} Check-in thành công. Data: {}", userId, data);
+        logger.info(" Client {} Check-in thành công. Data: {}", userId, data);
         return true;
     }
 
@@ -90,7 +90,7 @@ public class TimeTrackerClient implements Watcher {
         Stat stat = zooKeeper.exists(userPath, false);
         if (stat != null) {
             zooKeeper.delete(userPath, -1);
-            logger.info("❌ Client {} Check-out thành công. (ZNode đã bị xóa)", userId);
+            logger.info(" Client {} Check-out thành công. (ZNode đã bị xóa)", userId);
             return true;
         } else {
             logger.warn("Client {} chưa Check-in hoặc đã Check-out trước đó.", userId);
@@ -104,11 +104,9 @@ public class TimeTrackerClient implements Watcher {
         return zooKeeper.getChildren(TEAM_STATUS_PATH, watcher);
     }
     
-    //  Lấy dữ liệu trạng thái (trả về mảng byte)
     public byte[] getMemberData(String memberId) throws KeeperException, InterruptedException {
         String userPath = TEAM_STATUS_PATH + "/" + memberId;
         Stat stat = new Stat();
-        // Không thiết lập Watcher cho getData ở đây, vì Watcher đã được thiết lập ở getActiveMembers
         return zooKeeper.getData(userPath, false, stat);
     }
     
