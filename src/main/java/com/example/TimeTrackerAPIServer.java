@@ -28,14 +28,12 @@ public class TimeTrackerAPIServer {
     private static final int API_PORT = 4567;
     private static final Gson gson = new Gson();
 
-    // Default hourly rate for guests (VND per hour)
     private static final double DEFAULT_HOURLY_RATE = 50000.0;
 
     private static TimeTrackerClient zkClient;
-    // SET để lưu trữ các WebSocket Session đang hoạt động
+
     private static final Set<Session> activeSessions = Collections.synchronizedSet(new HashSet<>()); 
-    
-    // Cấu trúc Dữ liệu Nhân viên Giả lập
+   
     private static class EmployeeInfo {
         String id;
         String name;
@@ -146,7 +144,7 @@ public class TimeTrackerAPIServer {
         }
     }
 
-    // Scheduler to periodically broadcast status (helps update minutes/salary even if no ZK event)
+    
     private static final java.util.concurrent.ScheduledExecutorService broadcaster =
             java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r, "status-broadcaster");
@@ -161,7 +159,7 @@ public class TimeTrackerAPIServer {
         zkClient.connect(statusChangeWatcher); // TRUYỀN WATCHER VÀO KẾT NỐI
 
         // 2. Cấu hình Spark Server
-        // 2. Cấu hình Spark Server
+
         port(API_PORT);
         staticFiles.location("/public"); // Nếu bạn có các file tĩnh
         
@@ -185,7 +183,6 @@ public class TimeTrackerAPIServer {
             response.type("application/json");
         });
 
-        // Handle OPTIONS request
         options("/*", (request, response) -> {
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
             if (accessControlRequestHeaders != null) {
@@ -199,7 +196,6 @@ public class TimeTrackerAPIServer {
         });
         
 
-        // POST /api/checkin/:userId
         post("/api/checkin/:userId", "application/json", (request, response) -> {
             response.type("application/json");
             String userId = request.params(":userId");
@@ -225,7 +221,7 @@ public class TimeTrackerAPIServer {
             }
         });
 
-        // POST /api/checkout/:userId
+    
         post("/api/checkout/:userId", "application/json", (request, response) -> {
             response.type("application/json");
             String userId = request.params(":userId");
@@ -272,7 +268,7 @@ public class TimeTrackerAPIServer {
             )));
         });
 
-        // Handle 404 - Not Found
+    
         notFound((request, response) -> {
             response.type("application/json");
             return gson.toJson(Map.of(
@@ -280,8 +276,7 @@ public class TimeTrackerAPIServer {
                 "message", "Route not found"
             ));
         });
-        
-        // ENDPOINT CẤU HÌNH CONFIG (GET/POST /api/config/:key)
+       
         post("/api/config/:key", "application/json", (request, response) -> {
             String key = request.params(":key");
             String value = request.body();
@@ -310,8 +305,6 @@ public class TimeTrackerAPIServer {
             }
         });
 
-
-        // 5. Shutdown Hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             zkClient.close();
             try {
@@ -320,7 +313,7 @@ public class TimeTrackerAPIServer {
         }));
     }
     
-    // WEBSOCKET HANDLER ĐỂ QUẢN LÝ KẾT NỐI
+
     @WebSocket
     public static class StatusWebSocketHandler {
         @OnWebSocketConnect
@@ -348,7 +341,7 @@ public class TimeTrackerAPIServer {
         
         @OnWebSocketMessage
         public void onMessage(Session userSession, String message) {
-            // Không cần xử lý message từ Client trong ứng dụng này
+            
         }
     }
 }
