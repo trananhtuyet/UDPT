@@ -107,7 +107,7 @@
                     showStatus(`Lỗi ${action}: ${errMsg}`, 'error');
                 }
             } catch (error) {
-                showStatus(`❌ Lỗi kết nối Server Java (Port 4567). Chi tiết: ${error.message}`, 'error');
+                showStatus(` Lỗi kết nối Server Java (Port 4567). Chi tiết: ${error.message}`, 'error');
             } finally {
                 setButtonLoading(button, false);
             }
