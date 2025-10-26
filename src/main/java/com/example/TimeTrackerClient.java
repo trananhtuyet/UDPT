@@ -60,7 +60,7 @@ public class TimeTrackerClient implements Watcher {
         }
     }
 
-    // ⭐ Thao tác Check-in (Tạo Ephemeral ZNode)
+    // Thao tác Check-in (Tạo Ephemeral ZNode)
     public boolean checkIn() throws Exception {
         if (userId == null || userId.trim().isEmpty()) {
             throw new IllegalStateException("userId không được để trống");
@@ -80,7 +80,7 @@ public class TimeTrackerClient implements Watcher {
         return true;
     }
 
-    // ⭐ Thao tác Check-out (Xóa ZNode)
+    // Thao tác Check-out (Xóa ZNode)
     public boolean checkOut() throws Exception {
         if (userId == null || userId.trim().isEmpty()) {
             throw new IllegalStateException("userId không được để trống");
@@ -98,13 +98,13 @@ public class TimeTrackerClient implements Watcher {
         }
     }
     
-    // ⭐ Lấy danh sách thành viên đang hoạt động, có thể kèm Watcher
+    //  Lấy danh sách thành viên đang hoạt động, có thể kèm Watcher
     public List<String> getActiveMembers(Watcher watcher) throws KeeperException, InterruptedException {
         // Thiết lập Watcher tại đây. Khi ZNode con của TEAM_STATUS_PATH thay đổi (tạo/xóa), Watcher sẽ được kích hoạt
         return zooKeeper.getChildren(TEAM_STATUS_PATH, watcher);
     }
     
-    // ⭐ Lấy dữ liệu trạng thái (trả về mảng byte)
+    //  Lấy dữ liệu trạng thái (trả về mảng byte)
     public byte[] getMemberData(String memberId) throws KeeperException, InterruptedException {
         String userPath = TEAM_STATUS_PATH + "/" + memberId;
         Stat stat = new Stat();
@@ -112,7 +112,7 @@ public class TimeTrackerClient implements Watcher {
         return zooKeeper.getData(userPath, false, stat);
     }
     
-    // ⭐ Cập nhật dữ liệu cấu hình
+    //  Cập nhật dữ liệu cấu hình
     public void setConfigData(String key, String value) throws KeeperException, InterruptedException {
         String path = CONFIG_PATH + "/" + key;
         Stat stat = zooKeeper.exists(path, false);
@@ -125,7 +125,7 @@ public class TimeTrackerClient implements Watcher {
         }
     }
 
-    // ⭐ Đọc dữ liệu cấu hình
+    //  Đọc dữ liệu cấu hình
      public byte[] getConfigData(String key) throws KeeperException, InterruptedException {
         String path = CONFIG_PATH + "/" + key;
         Stat stat = new Stat();
